@@ -1,0 +1,25 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+
+# Build and TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+
+# Coverage reports
+coverage/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+.DS_Store
