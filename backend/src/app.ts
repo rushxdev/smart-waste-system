@@ -3,6 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import wasteRequestRoutes from "./routes/wasteRequest.routes";
+import paymentRoutes from "./routes/payment.routes";
+import wasteTrackingRoutes from "./routes/wasteTracking.routes";
+import analyticsRoutes from "./routes/analytics.routes";
 
 dotenv.config();
 
@@ -19,5 +22,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/waste-requests", wasteRequestRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/waste-tracking", wasteTrackingRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 export default app;
