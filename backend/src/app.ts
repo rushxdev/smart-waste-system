@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import wasteRequestRoutes from "./routes/wasteRequest.routes";
 
 dotenv.config();
 
@@ -16,5 +17,7 @@ connectDB();
 app.get("/", (req, res) => {
   res.send("Smart Waste Management API running...");
 });
+
+app.use("/api/waste-requests", wasteRequestRoutes);
 
 export default app;
