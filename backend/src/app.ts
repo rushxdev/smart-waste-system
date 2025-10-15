@@ -6,6 +6,7 @@ import wasteRequestRoutes from "./routes/wasteRequest.routes";
 import paymentRoutes from "./routes/payment.routes";
 import wasteTrackingRoutes from "./routes/wasteTracking.routes";
 import analyticsRoutes from "./routes/analytics.routes";
+import authRoutes from "./routes/auth.routes.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
   res.send("Smart Waste Management API running...");
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/waste-requests", wasteRequestRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/waste-tracking", wasteTrackingRoutes);
