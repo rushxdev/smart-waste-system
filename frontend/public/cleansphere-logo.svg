@@ -1,0 +1,20 @@
+<!-- CleanSphere Logo SVG -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="#4A90E2" stroke="#2E5A8A" stroke-width="4"/>
+  
+  <!-- Inner Green Circle -->
+  <circle cx="100" cy="100" r="60" fill="#7CB342"/>
+  
+  <!-- Water Drop -->
+  <path d="M100 30 C110 40, 120 50, 120 65 C120 75, 110 85, 100 85 C90 85, 80 75, 80 65 C80 50, 90 40, 100 30 Z" fill="#2E5A8A"/>
+  
+  <!-- Leaves -->
+  <path d="M70 50 C60 45, 55 50, 60 60 C65 55, 75 55, 70 50 Z" fill="#8BC34A"/>
+  <path d="M130 50 C140 45, 145 50, 140 60 C135 55, 125 55, 130 50 Z" fill="#8BC34A"/>
+  
+  <!-- Recycling arrows -->
+  <path d="M80 120 L70 130 L85 135 Z" fill="#FFFFFF"/>
+  <path d="M120 120 L130 130 L115 135 Z" fill="#FFFFFF"/>
+  <path d="M100 140 L105 125 L95 125 Z" fill="#FFFFFF"/>
+</svg>

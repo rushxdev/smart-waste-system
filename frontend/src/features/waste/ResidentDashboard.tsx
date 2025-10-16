@@ -1,32 +1,60 @@
 import { useState } from "react";
-import WasteRequestForm from "./components/wasteRequestForm";
-import WasteRequestList from "./components/WasteRequestList";
 import { useAuth } from "../../app/AuthContext";
+import { NavigationLayout } from "../../components/navigation";
+import type { NavigationItem } from "../../components/navigation/types";
+import { ResidentContent } from "./components/ResidentContent";
 
 export default function ResidentDashboard() {
   const { logout, user } = useAuth();
-  const [reloadFlag, setReloadFlag] = useState(false);
+  const [activeNavItem, setActiveNavItem] = useState<NavigationItem>({
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "🏠",
+    path: "/dashboard",
+    isActive: true
+  });
 
-  const refreshRequests = () => setReloadFlag((prev) => !prev);
+  const refreshRequests = () => {
+    // This will trigger re-render of content when needed
+    setActiveNavItem(prev => ({ ...prev }));
+  };
+
+  const handleNavigationChange = (item: NavigationItem) => {
+    setActiveNavItem(item);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          👋 Welcome, {user?.name}
-        </h1>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
-      </header>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <WasteRequestForm onRequestCreated={refreshRequests} />
-        <WasteRequestList key={String(reloadFlag)} />
+    <NavigationLayout 
+      userRole={user?.role || "resident"}
+      currentPath="/dashboard"
+      onNavigationChange={handleNavigationChange}
+    >
+      {/* Header Bar */}
+      <div className="bg-white shadow-sm border-b border-gray-200 p-4">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-semibold text-gray-800">
+              {activeNavItem.icon} {activeNavItem.label}
+            </h1>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-600">Hello, {user?.name}</span>
+            <button
+              onClick={logout}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Main Content */}
+      <ResidentContent 
+        activeNavItem={activeNavItem}
+        onRequestCreated={refreshRequests}
+      />
+    </NavigationLayout>
   );
 }

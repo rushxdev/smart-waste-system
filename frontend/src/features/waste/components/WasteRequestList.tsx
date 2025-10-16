@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type WasteRequest, getResidentWasteRequests } from "../services/wasteService";
+import { type WasteRequest, getResidentWasteRequests } from "../../../services/wasteService";
 
 export default function WasteRequestList() {
   const [requests, setRequests] = useState<WasteRequest[]>([]);
