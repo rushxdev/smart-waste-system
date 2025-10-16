@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createWasteRequest } from "../services/wasteService";
+import { createWasteRequest } from "../../../services/wasteService";
 
 interface Props {
   onRequestCreated: () => void;
@@ -14,7 +14,10 @@ export default function WasteRequestForm({ onRequestCreated }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      await createWasteRequest({ wasteType, weight });
+      await createWasteRequest({
+        wasteType, weight,
+        residentName: ""
+      });
       setWasteType("");
       setWeight(0);
       onRequestCreated();
@@ -37,7 +40,7 @@ export default function WasteRequestForm({ onRequestCreated }: Props) {
         placeholder="Waste Type (e.g., Plastic, Food)"
         value={wasteType}
         onChange={(e) => setWasteType(e.target.value)}
-        className="border p-2 rounded w-full"
+        className="w-full bg-white border-2 border-green-700 text-green-700 py-2 rounded-2xl"
         required
       />
 
@@ -46,14 +49,14 @@ export default function WasteRequestForm({ onRequestCreated }: Props) {
         placeholder="Weight (kg)"
         value={weight}
         onChange={(e) => setWeight(parseFloat(e.target.value))}
-        className="border p-2 rounded w-full"
+        className="w-full bg-white border-2 border-green-700 text-green-700 py-2 rounded-2xl"
         required
       />
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        className="w-full bg-[#3C4E1E] text-white py-2 rounded-2xl hover:bg-green-800 transition duration-200"
       >
         {loading ? "Submitting..." : "Submit Request"}
       </button>

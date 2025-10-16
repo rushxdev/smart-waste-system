@@ -13,7 +13,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           <Route
@@ -37,9 +37,9 @@ function App() {
           <Route
             path="/resident"
             element={
-              <ProtectedRoute allowedRoles={["resident"]}>
+              // <ProtectedRoute allowedRoles={["resident"]}>
                 <ResidentDashboard />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
         </Routes>
