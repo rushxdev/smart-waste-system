@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+//import { useDispatch } from "react-redux";   ..... denata meka ona ne hode.(0)
 //import { saveCard } from "../auth/authSlice"; // Assuming Redux slice
 
 interface CardDetails {
@@ -11,7 +11,7 @@ interface CardDetails {
 
 export default function AddCard() {
   const [card, setCard] = useState<CardDetails>({ holderName: "", number: "", expiry: "", cvv: "" });
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();  ..... denata meka ona ne hode.(1)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +20,7 @@ export default function AddCard() {
       alert("Invalid card number");
       return;
     }
-    dispatch(saveCard(card));
+    //dispatch(saveCard(card));   ..... denata meka ona ne hode.(2)
     // Call paymentService.saveCard(card) for backend integration
   };
 

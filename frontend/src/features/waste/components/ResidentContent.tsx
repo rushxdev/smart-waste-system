@@ -5,6 +5,9 @@ import { SchedulePickupView } from "./SchedulePickupView";
 import { MyRequestsView } from "./MyRequestsView";
 import WasteRequestList from "./WasteRequestList";
 
+import AddCard from "../../payment/AddCard";
+import PricingSummary from "../../payment/PricingSummary";
+
 // Content Manager Component (Single Responsibility Principle)
 interface ResidentContentProps {
   activeNavItem: NavigationItem;
@@ -42,7 +45,7 @@ export const ResidentContent: React.FC<ResidentContentProps> = ({
 
       case "pricing-summary":
         return <PricingSummary />;
-        
+
       case "tracking":
         return (
           <div className="space-y-6">

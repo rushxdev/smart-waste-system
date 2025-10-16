@@ -47,20 +47,21 @@ function App() {
           />
 
           <Route
-           path="/resident/add-card"
+           path="/resident/addcard" //// card dddd not tttt
            element={
-           <ProtectedRoute allowedRoles={["resident"]}>
+           //<ProtectedRoute allowedRoles={["resident"]}>
             <AddCard />
-           </ProtectedRoute>
+           //</ProtectedRoute>
           } />
           
           <Route
-           path="/resident/pricing-summary"
+           path="/resident/pricingsummary"
            element={
-            <ProtectedRoute allowedRoles={["resident"]}>
+            //<ProtectedRoute allowedRoles={["resident"]}>
             <PricingSummary />
-           </ProtectedRoute>
+           //</ProtectedRoute>
           } />
+
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-//import { processPayment } from "../payment/paymentSlice"; // Assuming Redux slice
+//import { useDispatch } from "react-redux";
+//import { processPayment } from "../payment/paymentSlice"; // Assuming Redux slice   ..... denata meka ona ne hode.(0)
 
 interface PaymentDetails {
   wasteType: string;
@@ -20,7 +20,7 @@ export default function PricingSummary() {
     finalAmount: 0,
     paymentMethod: "EcoCoins",
   });
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();  ..... denata meka ona ne hode.(1)
 
   const updateFinalAmount = () => {
     const final = payment.serviceFee - payment.ecoCoinsApplied;
@@ -29,7 +29,7 @@ export default function PricingSummary() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(processPayment(payment));
+    //dispatch(processPayment(payment));   ..... denata meka ona ne hode.(2)
     // Call paymentService.processPayment(payment) for backend
   };
 
