@@ -60,7 +60,7 @@ export class NavigationDataFactory {
       {
         id: "team-overview",
         label: "Team Overview",
-        icon: "👨‍👩‍👧‍👦",
+        icon: "👷",
         path: "/manager/team",
         isActive: false
       },
