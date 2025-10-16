@@ -17,9 +17,9 @@ export interface PaymentRequest {
 }
 
 export const saveCard = async (card: CardDetails): Promise<void> => {
-  await axiosInstance.post("/api/payment/card", card);
+  await axiosInstance.post("payment/card", card);
 };
 
 export const processPayment = async (payment: PaymentRequest): Promise<void> => {
-  await axiosInstance.post("/api/payment/process", payment);
+  await axiosInstance.post("payment/process", payment);
 };
