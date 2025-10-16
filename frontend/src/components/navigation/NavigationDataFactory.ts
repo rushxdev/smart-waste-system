@@ -24,6 +24,20 @@ export class NavigationDataFactory {
         icon: "📋",
         path: "/my-requests",
         isActive: false
+      },
+      {
+        id: "add-card",
+        label: "Add Card",
+        icon: "💳",
+        path: "/add-card",
+        isActive: false
+      },
+      {
+        id: "pricing-summary",
+        label: "Pricing & Summary",
+        icon: "💰",
+        path: "/pricing-summary",
+        isActive: false
       }
     ];
   }
