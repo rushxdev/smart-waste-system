@@ -9,7 +9,8 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbProps> = ({
   onItemClick,
   currentPath,
   showIcons = true,
-  className = ""
+  className = "",
+  onToggleSidebar
 }) => {
   const [navigationManager] = useState(() => new NavigationStateManager(items));
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(items);
@@ -42,6 +43,32 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbProps> = ({
     <nav className={baseClasses} role="navigation" aria-label="Main navigation">
       {/* Navigation Header with Logo */}
       <div className="p-6 pb-4 flex-shrink-0">
+        {/* Close Button - Top Right */}
+        {onToggleSidebar && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={onToggleSidebar}
+              className="bg-[#3C4E1E] bg-opacity-20 text-white p-2 rounded-lg shadow hover:bg-opacity-30 transition-colors duration-200"
+              aria-label="Close navigation sidebar"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+        
         {/* Logo Section */}
         <div className="flex items-center justify-center mb-4">
           <div className="w-20 h-20 bg-white rounded-full p-2 shadow-lg">

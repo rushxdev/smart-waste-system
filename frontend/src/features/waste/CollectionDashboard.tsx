@@ -1,25 +1,27 @@
-import { useAuth } from "../../app/AuthContext";
-import CollectorRequestList from "./components/CollectorRequestList";
+import { NavigationLayout } from "../../components/navigation/NavigationLayout";
+import { CollectorContent } from "./components/CollectorContent";
+import { NavigationDataFactory } from "../../components/navigation/NavigationDataFactory";
+import type { NavigationItem } from "../../components/navigation/types";
+import { useState } from "react";
 
+// Collector Dashboard with navigation (following SOLID principles)
 export default function CollectorDashboard() {
-  const { user, logout } = useAuth();
+  const [activeItem, setActiveItem] = useState<NavigationItem>(
+    NavigationDataFactory.createCollectorNavigationItems()[0]
+  );
+
+  const handleNavigationChange = (item: NavigationItem) => {
+    setActiveItem(item);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          🚛 Collector Dashboard — {user?.name}
-        </h1>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
-      </header>
-
-      <CollectorRequestList />
-    </div>
+    <NavigationLayout
+      userRole="collector"
+      onNavigationChange={handleNavigationChange}
+      activeItem={activeItem}
+    >
+      <CollectorContent activeItem={activeItem} />
+    </NavigationLayout>
   );
 }
 

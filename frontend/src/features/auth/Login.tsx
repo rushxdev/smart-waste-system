@@ -23,7 +23,15 @@ export default function Login() {
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-2xl shadow-md w-96 space-y-4"
-      >
+      ><div className="flex items-center justify-center mb-4">
+        <div className="w-20 h-20 bg-transparent rounded-full p-2 shadow-lg">
+          <img 
+        src="/Sustainability-Focused CleanSphere Logo - Minimalist Design 3.png" 
+        alt="CleanSphere Logo" 
+        className="w-full h-full object-contain"
+          />
+        </div>
+      </div>
         <h2 className="text-2xl font-semibold text-center text-green-700">Login</h2>
         <input
           type="email"

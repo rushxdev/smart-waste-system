@@ -17,4 +17,5 @@ export interface NavigationProps {
 export interface BreadcrumbProps extends NavigationProps {
   currentPath?: string;
   showIcons?: boolean;
+  onToggleSidebar?: () => void;
 }

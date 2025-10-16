@@ -17,20 +17,20 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           <Route
-            path="/admin"
+            path="/manager"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              // <ProtectedRoute allowedRoles={["admin"]}>
                 <ManagerDashboard />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
 
           <Route
             path="/collector"
             element={
-              <ProtectedRoute allowedRoles={["collector"]}>
+              // <ProtectedRoute allowedRoles={["collector"]}>
                 <CollectorDashboard />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
 

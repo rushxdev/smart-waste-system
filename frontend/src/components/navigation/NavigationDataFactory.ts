@@ -44,56 +44,15 @@ export class NavigationDataFactory {
         path: "/collector/pickups",
         isActive: false
       },
-      {
-        id: "route-planning",
-        label: "Route Planning",
-        icon: "🗺️",
-        path: "/collector/routes",
-        isActive: false
-      }
     ];
   }
 
-  // ✅ NEW USER ROLE - Admin Navigation
-  static createAdminNavigationItems(): NavigationItem[] {
-    return [
-      {
-        id: "admin-dashboard",
-        label: "Admin Dashboard",
-        icon: "⚙️",
-        path: "/admin/dashboard",
-        isActive: true
-      },
-      {
-        id: "user-management",
-        label: "User Management",
-        icon: "👥",
-        path: "/admin/users",
-        isActive: false
-      },
-      {
-        id: "system-settings",
-        label: "System Settings",
-        icon: "🔧",
-        path: "/admin/settings",
-        isActive: false
-      },
-      {
-        id: "reports",
-        label: "Reports & Analytics",
-        icon: "📊",
-        path: "/admin/reports",
-        isActive: false
-      }
-    ];
-  }
-
-  // ✅ NEW USER ROLE - Manager Navigation  
+  // ✅ MANAGER ROLE - Manager Navigation  
   static createManagerNavigationItems(): NavigationItem[] {
     return [
       {
         id: "manager-dashboard",
-        label: "Manager Dashboard",
+        label: "Dashboard",
         icon: "📈",
         path: "/manager/dashboard",
         isActive: true
@@ -105,13 +64,6 @@ export class NavigationDataFactory {
         path: "/manager/team",
         isActive: false
       },
-      {
-        id: "route-optimization",
-        label: "Route Optimization",
-        icon: "🛣️",
-        path: "/manager/routes",
-        isActive: false
-      }
     ];
   }
 
@@ -189,9 +141,8 @@ export class NavigationDataFactory {
         return this.createResidentNavigationItems();
       case "collector":
         return this.createCollectorNavigationItems();
-      case "admin": // ✅ NEW ROLE
-        return this.createAdminNavigationItems();
-      case "manager": // ✅ NEW ROLE
+      case "manager": // ✅ MANAGER ROLE
+      case "admin": // ✅ BACKWARD COMPATIBILITY - Map admin to manager
         return this.createManagerNavigationItems();
       default:
         return this.createResidentNavigationItems();
