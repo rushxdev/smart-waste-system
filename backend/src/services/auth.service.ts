@@ -4,16 +4,7 @@ import jwt from "jsonwebtoken";
 import { type IUser } from "../models/user.model";
 
 // Get environment variables with proper validation
-const JWT_SECRET = (() => {
-  const secret = process.env.JWT_SECRET;
-  if (typeof secret !== 'string' || secret.length === 0) {
-    throw new Error("JWT_SECRET environment variable is not set");
-  }
-  return secret;
-})();
 
-const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || "7d";
-const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
 
 export class AuthService {
   private repo: UserRepository;
@@ -21,12 +12,28 @@ export class AuthService {
   constructor(repo: UserRepository) {
     this.repo = repo;
   }
+// Get environment variables with proper validation
+    private getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (typeof secret !== 'string' || secret.length === 0) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
+    return secret;
+  }
+
+  private getJwtExpiresIn(): string {
+    return process.env.JWT_EXPIRES_IN || "7d";
+  }
+
+  private getSaltRounds(): number {
+    return Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+  }
 
   async register(userData: { name: string; email: string; password: string; role?: string; }): Promise<Partial<IUser>> {
     const existing = await this.repo.findByEmail(userData.email);
     if (existing) throw new Error("Email already registered");
 
-    const hashed = await bcrypt.hash(userData.password, SALT_ROUNDS);
+    const hashed = await bcrypt.hash(userData.password, this.getSaltRounds());
     const created = await this.repo.create({
       name: userData.name,
       email: userData.email,
