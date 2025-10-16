@@ -8,6 +8,9 @@ import ManagerDashboard from "./features/waste/ManagerDashboard";
 import CollectorDashboard from "./features/waste/CollectionDashboard";
 import ResidentDashboard from "./features/waste/ResidentDashboard";
 
+import AddCard from "./features/payment/AddCard";
+import PricingSummary from "./features/payment/PricingSummary";
+
 function App() {
   return (
     <AuthProvider>
@@ -42,6 +45,22 @@ function App() {
               // </ProtectedRoute>
             }
           />
+
+          <Route
+           path="/resident/add-card"
+           element={
+           <ProtectedRoute allowedRoles={["resident"]}>
+            <AddCard />
+           </ProtectedRoute>
+          } />
+          
+          <Route
+           path="/resident/pricing-summary"
+           element={
+            <ProtectedRoute allowedRoles={["resident"]}>
+            <PricingSummary />
+           </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </AuthProvider>

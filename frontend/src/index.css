@@ -1,2 +1,4 @@
 @import "tailwindcss";
 
+.bg-green-100 { background-color: #F0FDF4; }
+.border-green-300 { border-color: #BBF7D0; }

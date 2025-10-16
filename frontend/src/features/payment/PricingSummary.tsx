@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { processPayment } from "../payment/paymentSlice"; // Assuming Redux slice
+//import { processPayment } from "../payment/paymentSlice"; // Assuming Redux slice
 
 interface PaymentDetails {
   wasteType: string;
