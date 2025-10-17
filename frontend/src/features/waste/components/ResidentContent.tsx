@@ -37,8 +37,10 @@ export const ResidentContent: React.FC<ResidentContentProps> = ({
 
       case "my-requests":
         return <MyRequestsView />;
-      case "profile":
-        return <MyProfile/>
+      
+      case "my-profile":
+        return <MyProfile />;
+      
       case "tracking":
         return (
           <div className="space-y-6">
