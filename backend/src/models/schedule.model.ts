@@ -8,6 +8,7 @@ export interface ISchedule extends Document {
   city: string;
   status: "Scheduled" | "In Progress" | "Completed" | "Cancelled";
   managerId: string;
+  collectorId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,17 +62,20 @@ const scheduleSchema = new Schema<ISchedule>({
     default: "Scheduled", 
     required: true 
   },
-  managerId: { 
-    type: String, 
-    required: [true, "Manager ID is required"] 
+  managerId: {
+    type: String,
+    required: [true, "Manager ID is required"]
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  collectorId: {
+    type: String
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

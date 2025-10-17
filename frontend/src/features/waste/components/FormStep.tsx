@@ -178,6 +178,8 @@ export const FormStep: React.FC<FormStepProps> = ({ onSubmit, onBack, loading })
         <div className="flex gap-2 justify-center py-4">
           <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
           <div className="w-10 h-1 bg-[#3C4E1E] rounded-full"></div>
+          <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
+          <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
         </div>
 
         {/* Action Buttons */}

@@ -205,4 +205,35 @@ export class ScheduleService {
       throw new Error("Failed to fetch statistics. Please try again.");
     }
   }
+
+    // Create schedule from selected waste request IDs
+    static async createFromRequests(payload: {
+      requestIds: string[];
+      // legacy name may be optional now
+      name?: string;
+      date: string;
+      time: string;
+      city: string;
+      teamMemberId?: string; // frontend uses teamMemberId, map to collectorId for backend
+    }): Promise<any> {
+      try {
+        const mapped = {
+          requestIds: payload.requestIds,
+          name: payload.name || "",
+          date: payload.date,
+          time: payload.time,
+          city: payload.city,
+          managerId: "temp-manager-id", // TODO: get from auth context
+          collectorId: payload.teamMemberId
+        };
+        const response = await axiosInstance.post<ApiResponse<any>>(`${this.BASE_URL}/from-requests`, mapped);
+        if (!response.data.success) {
+          throw new Error(response.data.message || "Failed to create schedule from requests");
+        }
+        return response.data.data;
+      } catch (error: any) {
+        if (error.response?.data?.message) throw new Error(error.response.data.message);
+        throw new Error("Failed to create schedule from requests. Please try again.");
+      }
+    }
 }

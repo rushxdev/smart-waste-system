@@ -1,4 +1,4 @@
-import type { Collector, Schedule, TabConfig } from "../types/teamOverview.types";
+import type { Collector, TabConfig } from "../types/teamOverview.types";
 
 // Mock data for Team Overview (Data Layer - Dependency Inversion Principle)
 export const mockCollectors: Collector[] = [

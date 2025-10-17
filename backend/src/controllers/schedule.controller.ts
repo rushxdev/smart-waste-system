@@ -1,9 +1,12 @@
 import type { Request, Response } from "express";
 import { ScheduleService } from "../services/schedule.service";
-import { MockScheduleRepository } from "../repositories/mock.schedule.repository";
+import { ScheduleRepository } from "../repositories/schedule.repository";
+import { WasteRequestRepository } from "../repositories/wasteRequest.repository";
+import WasteRequest from "../models/wasteRequest.model";
 
-const repo = new MockScheduleRepository();
-const service = new ScheduleService(repo as any);
+const repo = new ScheduleRepository();
+const service = new ScheduleService(repo);
+const wasteRequestRepo = new WasteRequestRepository();
 
 // Schedule Controller (Presentation Layer - Single Responsibility Principle)
 export class ScheduleController {
@@ -260,6 +263,48 @@ export class ScheduleController {
         message: error.message,
         data: null
       });
+    }
+  }
+
+  // POST /schedules/from-requests - Create schedule from selected waste requests
+  static async createFromRequests(req: Request, res: Response) {
+    try {
+      const { requestIds, name, date, time, city, managerId, collectorId } = req.body;
+
+      console.log('[createFromRequests] Received data:', { requestIds, name, date, time, city, managerId, collectorId });
+
+      if (!Array.isArray(requestIds) || requestIds.length === 0) {
+        return res.status(400).json({ success: false, message: "requestIds array is required", data: null });
+      }
+
+      if (!collectorId) {
+        return res.status(400).json({ success: false, message: "collectorId is required", data: null });
+      }
+
+      // Create schedule using existing service logic
+      const scheduleData = { name, date, time, city, managerId, collectorId };
+      const schedule = await service.createSchedule(scheduleData as any);
+      console.log('[createFromRequests] Created schedule:', schedule);
+
+      // Update each waste request status to "Scheduled" and attach scheduleId and collectorId
+      const updatedRequests = [] as any[];
+      for (const id of requestIds) {
+        const reqDoc = await WasteRequest.findById(id);
+        if (!reqDoc) continue;
+        reqDoc.status = "Scheduled";
+        reqDoc.workStatus = "Pending";
+        reqDoc.scheduleId = schedule._id.toString();
+        reqDoc.collectorId = collectorId;
+        console.log('[createFromRequests] Updating request:', id, 'with collectorId:', collectorId);
+        const saved = await reqDoc.save();
+        console.log('[createFromRequests] Saved request collectorId:', saved.collectorId);
+        updatedRequests.push(saved);
+      }
+
+      res.status(201).json({ success: true, message: "Schedule created and requests updated", data: { schedule, updatedRequests } });
+    } catch (error: any) {
+      console.error('[createFromRequests] Error:', error);
+      res.status(400).json({ success: false, message: error.message, data: null });
     }
   }
 }

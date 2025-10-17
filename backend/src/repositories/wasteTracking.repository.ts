@@ -5,11 +5,11 @@ export class WasteTrackingRepository {
     return await Tracking.findOne({ requestId });
   }
 
-  async updateStatus(requestId: string, status: string, updatedBy: string): Promise<ITracking> {
+  async updateStatus(requestId: string, status: string, updatedBy?: string): Promise<ITracking> {
     const existing = await Tracking.findOne({ requestId });
     if (existing) {
       existing.status = status as any;
-      existing.updatedBy = updatedBy;
+      if (updatedBy) existing.updatedBy = updatedBy;
       existing.updatedAt = new Date();
       return await existing.save();
     }

@@ -55,6 +55,8 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
       <div className="flex gap-2 mb-8">
         <div className="w-10 h-1 bg-[#3C4E1E] rounded-full"></div>
         <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
+        <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
+        <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
       </div>
 
       {/* Schedule Now Button */}
