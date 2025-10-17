@@ -100,15 +100,28 @@ describe("ScheduleService", () => {
     });
 
     it("should throw error when time is in the past for today's date", async () => {
-      // Get today's date dynamically
+      // Get today's date dynamically using local time to match service parsing
       const today = new Date();
-      const todayString: string = today.toISOString().split('T')[0] as string; // Format: YYYY-MM-DD
+      const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-      // Use a time that's definitely in the past (early morning)
+      // Get current time and subtract minutes to ensure it's in the past (avoid hour wraparound issues)
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      // Ensure we use a time that's in the past - subtract 5 minutes or use current hour with 0 minutes if we're past minute 5
+      let pastHour = currentHour;
+      let pastMinute = currentMinute >= 5 ? currentMinute - 5 : 0;
+      if (currentMinute < 5 && currentHour > 0) {
+        pastHour = currentHour - 1;
+        pastMinute = 55;
+      }
+      const pastTimeString = `${String(pastHour).padStart(2, '0')}:${String(pastMinute).padStart(2, '0')}`;
+
       const todayData = {
         ...validScheduleData,
         date: todayString,
-        time: "01:00" // 1:00 AM - very early time that should be in the past
+        time: pastTimeString
       };
 
       // Mock empty conflicts for this test since we want to test time validation
