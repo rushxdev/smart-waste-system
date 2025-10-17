@@ -9,6 +9,8 @@ export { ResidentContent } from "./ResidentContent";
 // Schedule Pickup Flow Components
 export { WelcomeStep } from "./WelcomeStep";
 export { FormStep } from "./FormStep";
+export { PaymentStep } from "./PaymentStep";
+export { AddCardStep } from "./AddCardStep";
 export { SuccessStep } from "./SuccessStep";
 
 // Team Overview components (SOLID-compliant refactored components)
