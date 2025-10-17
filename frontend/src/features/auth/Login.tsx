@@ -12,7 +12,24 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate("/");
+      // Redirect based on user role after successful login
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        switch (user.role) {
+          case "manager":
+            navigate("/manager");
+            break;
+          case "collector":
+            navigate("/collector");
+            break;
+          case "resident":
+            navigate("/resident");
+            break;
+          default:
+            navigate("/");
+        }
+      }
     } catch {
       alert("Invalid credentials");
     }

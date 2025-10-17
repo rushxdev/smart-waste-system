@@ -20,7 +20,14 @@ export class NavigationDataFactory {
       },
       {
         id: "my-requests",
-        label: "My Requests",
+        label: "Pickup Requests",
+        icon: "📋",
+        path: "/my-requests",
+        isActive: false
+      },
+      {
+        id: "my-profile",
+        label: "Profile",
         icon: "📋",
         path: "/my-requests",
         isActive: false

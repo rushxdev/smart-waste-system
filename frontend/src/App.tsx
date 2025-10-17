@@ -19,27 +19,27 @@ function App() {
           <Route
             path="/manager"
             element={
-              // <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["manager"]}>
                 <ManagerDashboard />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/collector"
             element={
-              // <ProtectedRoute allowedRoles={["collector"]}>
+              <ProtectedRoute allowedRoles={["collector"]}>
                 <CollectorDashboard />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/resident"
             element={
-              // <ProtectedRoute allowedRoles={["resident"]}>
+              <ProtectedRoute allowedRoles={["resident"]}>
                 <ResidentDashboard />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
         </Routes>
