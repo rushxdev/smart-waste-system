@@ -72,7 +72,7 @@ describe("ScheduleService", () => {
     it("should throw error when date is in the past", async () => {
       const pastDateData = {
         ...validScheduleData,
-        date: "2020-01-01"
+        date: "2020-01-01" // Clearly in the past
       };
 
       await expect(scheduleService.createSchedule(pastDateData)).rejects.toThrow(
@@ -100,13 +100,17 @@ describe("ScheduleService", () => {
     });
 
     it("should throw error when time is in the past for today's date", async () => {
+      // Get today's date dynamically
+      const today = new Date();
+      const todayString: string = today.toISOString().split('T')[0] as string; // Format: YYYY-MM-DD
+
       // Use a time that's definitely in the past (early morning)
       const todayData = {
         ...validScheduleData,
-        date: "2025-10-16", // Today's date
+        date: todayString,
         time: "01:00" // 1:00 AM - very early time that should be in the past
       };
-      
+
       // Mock empty conflicts for this test since we want to test time validation
       mockRepository.checkConflict.mockResolvedValue([]);
 
@@ -192,10 +196,48 @@ describe("ScheduleService", () => {
       await scheduleService.updateSchedule("60d5ec4b6bfec61c64b90b01", conflictUpdateData);
 
       expect(mockRepository.checkConflict).toHaveBeenCalledWith(
-        "2025-10-21", 
-        "10:00", 
-        "Riverside", 
+        "2025-10-21",
+        "10:00",
+        "Riverside",
         "60d5ec4b6bfec61c64b90b01"
+      );
+    });
+
+    it("should throw error when updating date to the past", async () => {
+      const pastDateUpdateData = {
+        date: "2020-01-01"
+      };
+
+      mockRepository.findById.mockResolvedValue(mockSchedule);
+
+      await expect(scheduleService.updateSchedule("60d5ec4b6bfec61c64b90b01", pastDateUpdateData)).rejects.toThrow(
+        "Schedule date cannot be in the past"
+      );
+    });
+
+    it("should throw error when updating time format is invalid", async () => {
+      const invalidTimeUpdateData = {
+        time: "25:00"
+      };
+
+      mockRepository.findById.mockResolvedValue(mockSchedule);
+
+      await expect(scheduleService.updateSchedule("60d5ec4b6bfec61c64b90b01", invalidTimeUpdateData)).rejects.toThrow(
+        "Time must be in HH:MM format"
+      );
+    });
+
+    it("should throw error when update conflict exists", async () => {
+      const conflictUpdateData = {
+        date: "2025-10-21",
+        time: "10:00"
+      };
+
+      mockRepository.findById.mockResolvedValue(mockSchedule);
+      mockRepository.checkConflict.mockResolvedValue([createMockSchedule({ _id: "different-id" })]);
+
+      await expect(scheduleService.updateSchedule("60d5ec4b6bfec61c64b90b01", conflictUpdateData)).rejects.toThrow(
+        "Schedule conflict detected: Another schedule exists for Downtown at 10:00 on 2025-10-21"
       );
     });
   });
@@ -298,6 +340,29 @@ describe("ScheduleService", () => {
       expect(mockRepository.findByStatus).toHaveBeenCalledWith("Scheduled");
       expect(result).toEqual(mockSchedules);
     });
+
+    it("should filter by city when city provided", async () => {
+      const mockSchedules = [mockSchedule];
+      mockRepository.findByCity.mockResolvedValue(mockSchedules);
+
+      const result = await scheduleService.getAllSchedules({ city: "Downtown" });
+
+      expect(mockRepository.findByCity).toHaveBeenCalledWith("Downtown");
+      expect(result).toEqual(mockSchedules);
+    });
+
+    it("should filter by date range when startDate and endDate provided", async () => {
+      const mockSchedules = [mockSchedule];
+      mockRepository.findByDateRange.mockResolvedValue(mockSchedules);
+
+      const result = await scheduleService.getAllSchedules({
+        startDate: "2025-10-01",
+        endDate: "2025-10-31"
+      });
+
+      expect(mockRepository.findByDateRange).toHaveBeenCalledWith("2025-10-01", "2025-10-31");
+      expect(result).toEqual(mockSchedules);
+    });
   });
 
   describe("getSchedulesByManager", () => {
@@ -315,6 +380,62 @@ describe("ScheduleService", () => {
       await expect(scheduleService.getSchedulesByManager("")).rejects.toThrow(
         "Manager ID is required"
       );
+    });
+  });
+
+  describe("getScheduleStatistics", () => {
+    it("should return statistics for all managers", async () => {
+      const mockStats = {
+        total: 10,
+        scheduled: 5,
+        inProgress: 3,
+        completed: 2,
+        cancelled: 0
+      };
+      mockRepository.getStatistics.mockResolvedValue(mockStats);
+
+      const result = await scheduleService.getScheduleStatistics();
+
+      expect(mockRepository.getStatistics).toHaveBeenCalledWith(undefined);
+      expect(result).toEqual(mockStats);
+    });
+
+    it("should return statistics for specific manager", async () => {
+      const mockStats = {
+        total: 5,
+        scheduled: 3,
+        inProgress: 1,
+        completed: 1,
+        cancelled: 0
+      };
+      mockRepository.getStatistics.mockResolvedValue(mockStats);
+
+      const result = await scheduleService.getScheduleStatistics("manager123");
+
+      expect(mockRepository.getStatistics).toHaveBeenCalledWith("manager123");
+      expect(result).toEqual(mockStats);
+    });
+  });
+
+  describe("getUpcomingSchedules", () => {
+    it("should return upcoming schedules for all managers", async () => {
+      const mockSchedules = [mockSchedule];
+      mockRepository.getUpcoming.mockResolvedValue(mockSchedules);
+
+      const result = await scheduleService.getUpcomingSchedules();
+
+      expect(mockRepository.getUpcoming).toHaveBeenCalledWith(undefined);
+      expect(result).toEqual(mockSchedules);
+    });
+
+    it("should return upcoming schedules for specific manager", async () => {
+      const mockSchedules = [mockSchedule];
+      mockRepository.getUpcoming.mockResolvedValue(mockSchedules);
+
+      const result = await scheduleService.getUpcomingSchedules("manager123");
+
+      expect(mockRepository.getUpcoming).toHaveBeenCalledWith("manager123");
+      expect(result).toEqual(mockSchedules);
     });
   });
 });
