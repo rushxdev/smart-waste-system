@@ -4,6 +4,7 @@ import { DashboardWelcome } from "./DashboardWelcome";
 import { SchedulePickupView } from "./SchedulePickupView";
 import { MyRequestsView } from "./MyRequestsView";
 import WasteRequestList from "./WasteRequestList";
+import MyProfile from "./MyProfile";
 
 // Content Manager Component (Single Responsibility Principle)
 interface ResidentContentProps {
@@ -36,7 +37,8 @@ export const ResidentContent: React.FC<ResidentContentProps> = ({
 
       case "my-requests":
         return <MyRequestsView />;
-
+      case "profile":
+        return <MyProfile/>
       case "tracking":
         return (
           <div className="space-y-6">

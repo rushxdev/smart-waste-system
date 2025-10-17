@@ -9,8 +9,13 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register(form.name, form.email, form.password, form.role);
-    navigate("/login");
+    try {
+      await register(form.name, form.email, form.password, form.role);
+      alert("Registration successful! Please login.");
+      navigate("/");
+    } catch {
+      alert("Registration failed. Please try again.");
+    }
   };
 
   return (
