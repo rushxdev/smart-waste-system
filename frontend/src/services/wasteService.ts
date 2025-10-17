@@ -1,17 +1,18 @@
 import axiosInstance from "./axiosInstance";
 
 export interface WasteRequest {
-  residentName: string;
   _id?: string;
-  residentId?: string;
+  residentId: string;
+  address: string;
   wasteType: string;
-  weight: number;
-  status?: string;
-  paymentStatus?: string;
+  preferredDate: string;
+  preferredTime: string;
+  notes?: string;
+  status?: "Scheduled" | "Completed" | "Cancelled";
   createdAt?: string;
 }
 
-export const createWasteRequest = async (data: WasteRequest) => {
+export const createWasteRequest = async (data: Omit<WasteRequest, '_id' | 'status' | 'createdAt'>) => {
   const res = await axiosInstance.post("/waste-requests", data);
   return res.data;
 };

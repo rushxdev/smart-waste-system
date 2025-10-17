@@ -29,7 +29,7 @@ export class NavigationDataFactory {
         id: "my-profile",
         label: "Profile",
         icon: "📋",
-        path: "/my-requests",
+        path: "/my-profile",
         isActive: false
       }
     ];
