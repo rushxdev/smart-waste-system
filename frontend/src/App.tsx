@@ -9,6 +9,7 @@ import ScheduleSelectedRequests from "./features/waste/components/ScheduleSelect
 import { NavigationLayout } from "./components/navigation/NavigationLayout";
 import CollectorDashboard from "./features/waste/CollectionDashboard";
 import ResidentDashboard from "./features/waste/ResidentDashboard";
+import { TrackPickupView } from "./features/waste/components/TrackPickupView";
 
 function App() {
   return (
@@ -51,6 +52,17 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["resident"]}>
                 <ResidentDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/resident/track-pickup/:requestId"
+            element={
+              <ProtectedRoute allowedRoles={["resident"]}>
+                <NavigationLayout userRole="resident">
+                  <TrackPickupView />
+                </NavigationLayout>
               </ProtectedRoute>
             }
           />

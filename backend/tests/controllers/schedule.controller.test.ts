@@ -5,7 +5,7 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // Mock the ScheduleService
 jest.mock("../../src/services/schedule.service");
-jest.mock("../../src/repositories/mock.schedule.repository");
+jest.mock("../../src/repositories/schedule.repository");
 
 describe("ScheduleController", () => {
   let mockRequest: Partial<Request>;
@@ -239,6 +239,109 @@ describe("ScheduleController", () => {
       await ScheduleController.getUpcoming(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(200);
+    });
+
+    it("should return 500 on service error", async () => {
+      (ScheduleService.prototype.getUpcomingSchedules as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+      await ScheduleController.getUpcoming(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(500);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: false,
+        message: "Database error",
+        data: null
+      });
+    });
+  });
+
+  describe("getAll error handling", () => {
+    it("should return 500 on service error", async () => {
+      (ScheduleService.prototype.getAllSchedules as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+      await ScheduleController.getAll(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(500);
+      expect(mockJson).toHaveBeenCalledWith({
+        success: false,
+        message: "Database error",
+        data: null
+      });
+    });
+  });
+
+  describe("update error handling", () => {
+    it("should return 404 when schedule not found", async () => {
+      mockRequest.params = { id: "nonexistent" };
+      mockRequest.body = { name: "Updated" };
+      (ScheduleService.prototype.updateSchedule as jest.Mock).mockRejectedValue(new Error("Schedule not found"));
+
+      await ScheduleController.update(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(404);
+    });
+
+    it("should return 400 on validation error", async () => {
+      mockRequest.params = { id: "schedule123" };
+      mockRequest.body = { name: "Updated" };
+      (ScheduleService.prototype.updateSchedule as jest.Mock).mockRejectedValue(new Error("Invalid data"));
+
+      await ScheduleController.update(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(400);
+    });
+  });
+
+  describe("updateStatus error handling", () => {
+    it("should return 400 when ID is missing", async () => {
+      mockRequest.params = {};
+      mockRequest.body = { status: "Completed" };
+
+      await ScheduleController.updateStatus(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(400);
+    });
+
+    it("should return 404 when schedule not found", async () => {
+      mockRequest.params = { id: "nonexistent" };
+      mockRequest.body = { status: "Completed" };
+      (ScheduleService.prototype.updateScheduleStatus as jest.Mock).mockRejectedValue(new Error("Schedule not found"));
+
+      await ScheduleController.updateStatus(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(404);
+    });
+  });
+
+  describe("delete error handling", () => {
+    it("should return 404 when schedule not found", async () => {
+      mockRequest.params = { id: "nonexistent" };
+      (ScheduleService.prototype.deleteSchedule as jest.Mock).mockRejectedValue(new Error("Schedule not found"));
+
+      await ScheduleController.delete(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(404);
+    });
+  });
+
+  describe("getByManager error handling", () => {
+    it("should return 500 on service error", async () => {
+      mockRequest.params = { managerId: "manager123" };
+      (ScheduleService.prototype.getSchedulesByManager as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+      await ScheduleController.getByManager(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe("getStatistics error handling", () => {
+    it("should return 500 on service error", async () => {
+      (ScheduleService.prototype.getScheduleStatistics as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+      await ScheduleController.getStatistics(mockRequest as Request, mockResponse as Response);
+
+      expect(mockStatus).toHaveBeenCalledWith(500);
     });
   });
 });

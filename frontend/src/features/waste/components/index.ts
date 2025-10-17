@@ -5,6 +5,8 @@ export { DashboardWelcome } from "./DashboardWelcome";
 export { SchedulePickupView } from "./SchedulePickupView";
 export { MyRequestsView } from "./MyRequestsView";
 export { ResidentContent } from "./ResidentContent";
+export { TrackPickupView } from "./TrackPickupView";
+export { WasteRequestRow } from "./WasteRequestRow";
 
 // Schedule Pickup Flow Components
 export { WelcomeStep } from "./WelcomeStep";

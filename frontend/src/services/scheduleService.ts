@@ -214,7 +214,7 @@ export class ScheduleService {
       date: string;
       time: string;
       city: string;
-      teamMemberId?: string; // frontend uses teamMemberId, map to managerId for backend
+      teamMemberId?: string; // frontend uses teamMemberId, map to collectorId for backend
     }): Promise<any> {
       try {
         const mapped = {
@@ -223,7 +223,8 @@ export class ScheduleService {
           date: payload.date,
           time: payload.time,
           city: payload.city,
-          managerId: payload.teamMemberId
+          managerId: "temp-manager-id", // TODO: get from auth context
+          collectorId: payload.teamMemberId
         };
         const response = await axiosInstance.post<ApiResponse<any>>(`${this.BASE_URL}/from-requests`, mapped);
         if (!response.data.success) {

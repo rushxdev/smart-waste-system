@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ScheduleService } from "../../../services/scheduleService";
 import { getUsersByRole } from "../../../services/userService";
+import { getAllWasteRequests } from "../../../services/wasteService";
+import type { WasteRequest } from "../../../services/wasteService";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -13,30 +15,75 @@ export default function ScheduleSelectedRequests() {
   const idsParam = query.get("requestIds") || "";
   const requestIds = idsParam ? idsParam.split(",") : [];
 
-  const [form, setForm] = useState({ date: "", time: "08:00", city: "", teamMemberId: "", collectionType: "Recyclable" });
+  const [form, setForm] = useState({ name: "", date: "", time: "08:00", city: "", teamMemberId: "", collectionType: "Recyclable" });
   const [loading, setLoading] = useState(false);
-  const [collectors, setCollectors] = useState<any[]>([]);
+  const [collectors, setCollectors] = useState<Array<{ _id: string; name: string }>>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await getUsersByRole("collector");
-        setCollectors(data || []);
-        if (data && data.length > 0) setForm(f => ({ ...f, teamMemberId: data[0]._id }));
+        // Fetch collectors
+        const collectorData = await getUsersByRole("collector");
+        setCollectors(collectorData || []);
+        if (collectorData && collectorData.length > 0) setForm(f => ({ ...f, teamMemberId: collectorData[0]._id }));
+
+        // Fetch selected waste requests
+        if (requestIds.length > 0) {
+          const allRequests = await getAllWasteRequests();
+          const filtered = allRequests.filter((req: WasteRequest) => requestIds.includes(req._id || ""));
+
+          // Auto-populate form data from requests
+          if (filtered.length > 0) {
+            // Extract city from first request's address
+            const firstAddress = filtered[0].address || "";
+            const cityMatch = firstAddress.split(",").pop()?.trim() || "";
+
+            // Get waste types
+            const wasteTypes = [...new Set(filtered.map((r: WasteRequest) => r.wasteType))];
+            const collectionType = wasteTypes.length === 1 ? wasteTypes[0] : filtered[0].wasteType;
+
+            // Generate schedule name
+            const scheduleName = `${collectionType} Collection - ${cityMatch}`;
+
+            setForm(f => ({
+              ...f,
+              city: cityMatch,
+              collectionType: collectionType || "Recyclable",
+              name: scheduleName
+            }));
+          }
+        }
       } catch (e) {
-        console.error("Failed to load collectors", e);
+        console.error("Failed to load data", e);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = async () => {
+    // Validate all required fields
     if (requestIds.length === 0) {
       alert("No requests selected");
       return;
     }
 
+    if (!form.name) {
+      alert("Schedule name is required");
+      return;
+    }
+
+    if (!form.date) {
+      alert("Date is required");
+      return;
+    }
+
+    if (!form.city) {
+      alert("City is required");
+      return;
+    }
+
     if (!form.teamMemberId) {
-      alert("Assign Team to confirm");
+      alert("Team assignment is required");
       return;
     }
 
@@ -44,9 +91,10 @@ export default function ScheduleSelectedRequests() {
     try {
       await ScheduleService.createFromRequests({ ...form, requestIds });
       alert("Scheduled successfully");
-      navigate("/manager/requests");
-    } catch (e: any) {
-      alert(e.message || "Failed to schedule");
+      navigate("/manager");
+    } catch (e) {
+      const error = e as Error;
+      alert(error.message || "Failed to schedule");
     } finally {
       setLoading(false);
     }
@@ -70,18 +118,31 @@ export default function ScheduleSelectedRequests() {
         <div className="mb-4 flex items-center space-x-3">
           <div className="inline-flex items-center bg-green-50 text-green-700 px-3 py-2 rounded">
             <input type="checkbox" className="mr-2 h-4 w-4 text-green-600" checked readOnly />
-            <span className="text-sm">{requestIds.length} Individuals Selected</span>
+            <span className="text-sm">{requestIds.length} Request{requestIds.length !== 1 ? 's' : ''} Selected</span>
           </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm text-gray-700 mb-2">Schedule Name</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            className="w-full border p-3 rounded"
+            placeholder="Enter schedule name"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm text-gray-700 mb-2">Select City</label>
-            <select value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="w-full border p-3 rounded">
-              <option value="">City</option>
-              <option>City A</option>
-              <option>City B</option>
-            </select>
+            <label className="block text-sm text-gray-700 mb-2">City</label>
+            <input
+              type="text"
+              value={form.city}
+              onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+              className="w-full border p-3 rounded"
+              placeholder="City name"
+            />
           </div>
 
           <div className="flex space-x-2 items-center">
@@ -99,7 +160,7 @@ export default function ScheduleSelectedRequests() {
         <div className="mb-4">
           <label className="block text-sm text-gray-700 mb-2">Preferred Collection Type</label>
           <div className="flex space-x-3">
-            {['Recyclable','Non-Recyclable','Hazarduous'].map(type => (
+            {['Recyclable','Non-Recyclable','Hazardous'].map(type => (
               <button key={type} onClick={() => setForm(f => ({ ...f, collectionType: type }))} className={`px-4 py-2 rounded-full ${form.collectionType === type ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{type}</button>
             ))}
           </div>
@@ -117,11 +178,14 @@ export default function ScheduleSelectedRequests() {
         </div>
 
         <div className="mt-2 mb-4 p-4 bg-gray-50 rounded">
-          <h4 className="font-semibold mb-2">Summary</h4>
+          <h4 className="font-semibold mb-2">Schedule Summary</h4>
           <div className="text-sm text-gray-700 space-y-1">
-            <div>{form.date || '—'} {form.time || ''}</div>
-            <div>Team: <span className="font-medium">{collectors.find(c => c._id === form.teamMemberId)?.name || 'Unassigned'}</span></div>
-            <div>{form.collectionType}</div>
+            <div><span className="font-medium">Name:</span> {form.name || '—'}</div>
+            <div><span className="font-medium">Date & Time:</span> {form.date || '—'} at {form.time || '—'}</div>
+            <div><span className="font-medium">City:</span> {form.city || '—'}</div>
+            <div><span className="font-medium">Team:</span> {collectors.find(c => c._id === form.teamMemberId)?.name || 'Unassigned'}</div>
+            <div><span className="font-medium">Collection Type:</span> {form.collectionType}</div>
+            <div><span className="font-medium">Requests:</span> {requestIds.length} waste pickup request{requestIds.length !== 1 ? 's' : ''}</div>
           </div>
         </div>
 
@@ -129,8 +193,6 @@ export default function ScheduleSelectedRequests() {
           <button onClick={submit} disabled={loading} className="bg-green-800 text-white px-6 py-3 rounded shadow">{loading ? 'Scheduling...' : 'Confirm Schedule'}</button>
           <button onClick={() => navigate('/manager')} className="border border-gray-300 px-6 py-3 rounded">Cancel</button>
         </div>
-
-        {!form.teamMemberId && <div className="text-sm text-red-600 mt-3">Assign Team to confirm</div>}
       </div>
     </div>
   );

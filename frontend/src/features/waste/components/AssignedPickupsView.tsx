@@ -1,94 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getCollectorRequests, updateWorkStatus } from "../../../services/wasteService";
+import { useAuth } from "../../../app/AuthContext";
+import type { WasteRequest } from "../../../services/wasteService";
 
 // Assigned Pickups View Component for Collector (Single Responsibility Principle)
 export const AssignedPickupsView: React.FC = () => {
+  const { user } = useAuth();
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("time");
+  const [pickups, setPickups] = useState<WasteRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pickups = [
-    {
-      id: 1,
-      address: "123 Main Street, Apt 2A",
-      customerName: "John Smith",
-      phone: "+94 77 123 4567",
-      pickupTime: "09:00 AM",
-      wasteType: "Recyclable",
-      status: "pending",
-      priority: "normal",
-      notes: "Ring doorbell twice",
-      estimatedWeight: "15 kg"
-    },
-    {
-      id: 2,
-      address: "456 Oak Avenue",
-      customerName: "Sarah Johnson",
-      phone: "+94 77 234 5678",
-      pickupTime: "09:30 AM",
-      wasteType: "Organic",
-      status: "completed",
-      priority: "high",
-      notes: "Fragile items included",
-      estimatedWeight: "8 kg"
-    },
-    {
-      id: 3,
-      address: "789 Pine Road, House #15",
-      customerName: "Mike Wilson",
-      phone: "+94 77 345 6789",
-      pickupTime: "10:15 AM",
-      wasteType: "Mixed",
-      status: "in-progress",
-      priority: "normal",
-      notes: "Gate code: 1234",
-      estimatedWeight: "22 kg"
-    },
-    {
-      id: 4,
-      address: "321 Elm Street",
-      customerName: "Emily Davis",
-      phone: "+94 77 456 7890",
-      pickupTime: "11:00 AM",
-      wasteType: "Electronic",
-      status: "pending",
-      priority: "high",
-      notes: "Handle with care - computers",
-      estimatedWeight: "12 kg"
-    },
-    {
-      id: 5,
-      address: "654 Maple Lane, Unit B",
-      customerName: "David Brown",
-      phone: "+94 77 567 8901",
-      pickupTime: "11:45 AM",
-      wasteType: "Recyclable",
-      status: "pending",
-      priority: "normal",
-      notes: "Leave at side entrance",
-      estimatedWeight: "18 kg"
-    }
-  ];
+  useEffect(() => {
+    loadPickups();
+  }, [user]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const loadPickups = async () => {
+    if (!user?.id) return;
+    try {
+      setLoading(true);
+      const data = await getCollectorRequests(user.id);
+      setPickups(data);
+    } catch (error) {
+      console.error("Failed to load pickups:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "text-red-600";
-      case "normal":
-        return "text-gray-600";
+  const handleStatusUpdate = async (requestId: string | undefined, newStatus: string) => {
+    if (!requestId) return;
+    try {
+      await updateWorkStatus(requestId, newStatus);
+      await loadPickups(); // Reload data
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert("Failed to update status");
+    }
+  };
+
+
+  const getStatusColor = (workStatus?: string) => {
+    switch (workStatus) {
+      case "Completed":
+        return "bg-green-100 text-green-800";
+      case "In Progress":
+        return "bg-blue-100 text-blue-800";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "Not complete":
+        return "bg-gray-100 text-gray-800";
       default:
-        return "text-gray-600";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -101,21 +64,22 @@ export const AssignedPickupsView: React.FC = () => {
       case "Electronic":
         return "💻";
       case "Mixed":
+      case "Non-Recyclable":
         return "🗑️";
+      case "Hazardous":
+        return "⚠️";
       default:
         return "📦";
     }
   };
 
-  const filteredPickups = pickups.filter(pickup => 
-    filterStatus === "all" || pickup.status === filterStatus
+  const filteredPickups = pickups.filter(pickup =>
+    filterStatus === "all" || pickup.workStatus === filterStatus
   );
 
   const sortedPickups = [...filteredPickups].sort((a, b) => {
     if (sortBy === "time") {
-      return a.pickupTime.localeCompare(b.pickupTime);
-    } else if (sortBy === "priority") {
-      return a.priority === "high" ? -1 : 1;
+      return (a.preferredTime || "").localeCompare(b.preferredTime || "");
     }
     return 0;
   });
@@ -145,9 +109,9 @@ export const AssignedPickupsView: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="all">All Pickups</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
 
@@ -174,30 +138,24 @@ export const AssignedPickupsView: React.FC = () => {
       </div>
 
       {/* Pickup Statistics */}
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl shadow-md text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {pickups.filter(p => p.status === "pending").length}
+          <div className="text-2xl font-bold text-yellow-600">
+            {pickups.filter(p => p.workStatus === "Pending").length}
           </div>
           <div className="text-sm text-gray-600">Pending</div>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-md text-center">
-          <div className="text-2xl font-bold text-yellow-600">
-            {pickups.filter(p => p.status === "in-progress").length}
+          <div className="text-2xl font-bold text-blue-600">
+            {pickups.filter(p => p.workStatus === "In Progress").length}
           </div>
           <div className="text-sm text-gray-600">In Progress</div>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-md text-center">
           <div className="text-2xl font-bold text-green-600">
-            {pickups.filter(p => p.status === "completed").length}
+            {pickups.filter(p => p.workStatus === "Completed").length}
           </div>
           <div className="text-sm text-gray-600">Completed</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow-md text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {pickups.reduce((sum, p) => sum + parseFloat(p.estimatedWeight), 0)} kg
-          </div>
-          <div className="text-sm text-gray-600">Total Weight</div>
         </div>
       </div>
 
@@ -210,72 +168,78 @@ export const AssignedPickupsView: React.FC = () => {
         </div>
 
         <div className="divide-y divide-gray-200">
-          {sortedPickups.map((pickup) => (
-            <div key={pickup.id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-2xl">{getWasteTypeIcon(pickup.wasteType)}</span>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{pickup.address}</h3>
-                      <p className="text-gray-600">{pickup.customerName} • {pickup.phone}</p>
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">Loading pickups...</div>
+          ) : sortedPickups.length === 0 ? (
+            <div className="p-12 text-center text-gray-500">No pickups assigned yet</div>
+          ) : (
+            sortedPickups.map((pickup) => (
+              <div key={pickup._id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">{getWasteTypeIcon(pickup.wasteType)}</span>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">{pickup.address}</h3>
+                        <p className="text-gray-600">{(pickup as any).residentName || pickup.residentId}</p>
+                      </div>
                     </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Preferred Date:</span>
+                        <div className="font-medium text-gray-800">{pickup.preferredDate}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Preferred Time:</span>
+                        <div className="font-medium text-gray-800">{pickup.preferredTime}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Waste Type:</span>
+                        <div className="font-medium text-gray-800">{pickup.wasteType}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Status:</span>
+                        <div className="font-medium text-gray-800">{pickup.status}</div>
+                      </div>
+                    </div>
+
+                    {pickup.notes && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                        <span className="text-blue-600 text-sm font-medium">📝 Note: </span>
+                        <span className="text-blue-700 text-sm">{pickup.notes}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Pickup Time:</span>
-                      <div className="font-medium text-gray-800">{pickup.pickupTime}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Waste Type:</span>
-                      <div className="font-medium text-gray-800">{pickup.wasteType}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Estimated Weight:</span>
-                      <div className="font-medium text-gray-800">{pickup.estimatedWeight}</div>
-                    </div>
-                  </div>
+                  <div className="ml-6 flex flex-col items-end space-y-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(pickup.workStatus)}`}>
+                      {pickup.workStatus || "Not Started"}
+                    </span>
 
-                  {pickup.notes && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                      <span className="text-blue-600 text-sm font-medium">📝 Note: </span>
-                      <span className="text-blue-700 text-sm">{pickup.notes}</span>
+                    <div className="flex flex-col space-y-2 mt-3">
+                      {pickup.workStatus === "Pending" && (
+                        <button
+                          onClick={() => handleStatusUpdate(pickup._id, "In Progress")}
+                          className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                        >
+                          ▶️ Start
+                        </button>
+                      )}
+                      {pickup.workStatus === "In Progress" && (
+                        <button
+                          onClick={() => handleStatusUpdate(pickup._id, "Completed")}
+                          className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                        >
+                          ✅ Complete
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
-
-                <div className="ml-6 flex flex-col items-end space-y-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(pickup.status)}`}>
-                    {pickup.status.charAt(0).toUpperCase() + pickup.status.slice(1)}
-                  </span>
-                  
-                  <span className={`text-xs font-medium ${getPriorityColor(pickup.priority)}`}>
-                    {pickup.priority === "high" ? "🔥 High Priority" : "📋 Normal"}
-                  </span>
-
-                  <div className="flex space-x-2 mt-3">
-                    <button className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors">
-                      📍 Navigate
-                    </button>
-                    <button className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors">
-                      📞 Call
-                    </button>
-                    {pickup.status === "pending" && (
-                      <button className="px-3 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700 transition-colors">
-                        ▶️ Start
-                      </button>
-                    )}
-                    {pickup.status === "in-progress" && (
-                      <button className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors">
-                        ✅ Complete
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -9,6 +9,8 @@ export interface IWasteRequest extends Document {
   notes?: string;
   workStatus?: "Not complete" | "Pending" | "In Progress" | "Completed";
   status: "Pending" | "Scheduled" | "Completed" | "Cancelled";
+  scheduleId?: string;
+  collectorId?: string;
   createdAt: Date;
 }
 
@@ -21,6 +23,8 @@ const wasteRequestSchema = new Schema<IWasteRequest>({
   notes: { type: String },
   workStatus: { type: String, enum: ["Not complete", "Pending", "In Progress", "Completed"], default: "Not complete" },
   status: { type: String, enum: ["Pending", "Scheduled", "Completed", "Cancelled"], default: "Pending", required: true },
+  scheduleId: { type: String },
+  collectorId: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
