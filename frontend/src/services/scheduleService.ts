@@ -205,4 +205,25 @@ export class ScheduleService {
       throw new Error("Failed to fetch statistics. Please try again.");
     }
   }
+
+    // Create schedule from selected waste request IDs
+    static async createFromRequests(payload: {
+      requestIds: string[];
+      name: string;
+      date: string;
+      time: string;
+      city: string;
+      managerId?: string;
+    }): Promise<any> {
+      try {
+        const response = await axiosInstance.post<ApiResponse<any>>(`${this.BASE_URL}/from-requests`, payload);
+        if (!response.data.success) {
+          throw new Error(response.data.message || "Failed to create schedule from requests");
+        }
+        return response.data.data;
+      } catch (error: any) {
+        if (error.response?.data?.message) throw new Error(error.response.data.message);
+        throw new Error("Failed to create schedule from requests. Please try again.");
+      }
+    }
 }

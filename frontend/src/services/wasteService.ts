@@ -21,6 +21,12 @@ export const getResidentWasteRequests = async () => {
   return res.data;
 };
 
+// Admin: get all waste requests
+export const getAllWasteRequests = async () => {
+  const res = await axiosInstance.get("/waste-requests");
+  return res.data;
+};
+
 export const getCollectorRequests = async () => {
   const res = await axiosInstance.get("/tracking");
   return res.data;

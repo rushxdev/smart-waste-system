@@ -1,9 +1,12 @@
 import type { Request, Response } from "express";
 import { ScheduleService } from "../services/schedule.service";
 import { MockScheduleRepository } from "../repositories/mock.schedule.repository";
+import { WasteRequestRepository } from "../repositories/wasteRequest.repository";
+import WasteRequest from "../models/wasteRequest.model";
 
 const repo = new MockScheduleRepository();
 const service = new ScheduleService(repo as any);
+const wasteRequestRepo = new WasteRequestRepository();
 
 // Schedule Controller (Presentation Layer - Single Responsibility Principle)
 export class ScheduleController {
@@ -260,6 +263,37 @@ export class ScheduleController {
         message: error.message,
         data: null
       });
+    }
+  }
+
+  // POST /schedules/from-requests - Create schedule from selected waste requests
+  static async createFromRequests(req: Request, res: Response) {
+    try {
+      const { requestIds, name, date, time, city, managerId } = req.body;
+
+      if (!Array.isArray(requestIds) || requestIds.length === 0) {
+        return res.status(400).json({ success: false, message: "requestIds array is required", data: null });
+      }
+
+      // Create schedule using existing service logic
+      const scheduleData = { name, date, time, city, managerId };
+      const schedule = await service.createSchedule(scheduleData as any);
+
+      // Update each waste request status to "Scheduled" and attach scheduleId
+      const updatedRequests = [] as any[];
+      for (const id of requestIds) {
+        const reqDoc = await WasteRequest.findById(id);
+        if (!reqDoc) continue;
+        reqDoc.status = "Scheduled" as any;
+        // Optionally store schedule id in notes or another field; use notes append
+        reqDoc.notes = `${reqDoc.notes || ""} | scheduledId:${(schedule as any)._id}`;
+        const saved = await reqDoc.save();
+        updatedRequests.push(saved);
+      }
+
+      res.status(201).json({ success: true, message: "Schedule created and requests updated", data: { schedule, updatedRequests } });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message, data: null });
     }
   }
 }

@@ -3,6 +3,7 @@ import type { NavigationItem } from "../../../components/navigation/types";
 import { ManagerWelcome } from "./ManagerWelcome";
 import { TeamOverviewView } from "./TeamOverviewView";
 import { RouteOptimizationView } from "./RouteOptimizationView";
+import ManagerRequests from "./ManagerRequests";
 
 // Manager Content Component following SOLID principles (Single Responsibility Principle)
 interface ManagerContentProps {
@@ -40,6 +41,8 @@ export const ManagerContent: React.FC<ManagerContentProps> = ({ activeItem }) =>
     switch (activeItem.id) {
       case "manager-dashboard":
         return <ManagerWelcome analytics={mockAnalytics} loading={false} />;
+      case "requests":
+        return <ManagerRequests />;
       case "team-overview":
         return <TeamOverviewView />;
       case "route-optimization":
