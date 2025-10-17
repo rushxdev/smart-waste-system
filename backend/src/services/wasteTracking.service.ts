@@ -14,7 +14,7 @@ export class WasteTrackingService {
     return tracking;
   }
 
-  async updateTrackingStatus(requestId: string, status: string, collectorId: string): Promise<ITracking> {
+  async updateTrackingStatus(requestId: string, status: string, collectorId: any): Promise<ITracking> {
     const allowedStatuses = ["Scheduled", "In Progress", "Collected"];
     if (!allowedStatuses.includes(status)) throw new Error("Invalid status");
     return await this.repo.updateStatus(requestId, status, collectorId);

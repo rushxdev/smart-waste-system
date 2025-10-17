@@ -8,11 +8,17 @@ export interface WasteRequest {
   preferredDate: string;
   preferredTime: string;
   notes?: string;
-  status?: "Scheduled" | "Completed" | "Cancelled";
+  // include Pending and Collected to match front-end usage and back-end values
+  status?: "Pending" | "Scheduled" | "Collected" | "Completed" | "Cancelled";
+  residentName?: string;
+  weight?: number;
+  paymentStatus?: string;
   createdAt?: string;
 }
 
-export const createWasteRequest = async (data: Omit<WasteRequest, '_id' | 'status' | 'createdAt'>) => {
+export type CreateWasteRequest = Partial<Omit<WasteRequest, '_id' | 'status' | 'createdAt'>>;
+
+export const createWasteRequest = async (data: CreateWasteRequest) => {
   const res = await axiosInstance.post("/waste-requests", data);
   return res.data;
 };

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getAllWasteRequests } from "../../../services/wasteService";
-import { ScheduleService } from "../../../services/scheduleService";
 
 export default function ManagerRequests() {
   const [requests, setRequests] = useState<any[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", date: "", time: "08:00", city: "", managerId: "manager123" });
+  // Form moved to separate page; keep only selection state here
+  const [view, setView] = useState<"unscheduled" | "scheduled">("unscheduled");
+  const location = useLocation();
 
   const load = async () => {
     setLoading(true);
@@ -21,28 +22,27 @@ export default function ManagerRequests() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { 
+    // read optional ?view= scheduled|unscheduled to set initial tab
+    const params = new URLSearchParams(location.search);
+    const v = params.get('view');
+    if (v === 'scheduled' || v === 'unscheduled') setView(v);
+    load(); 
+  }, [location.search]);
 
   const toggle = (id: string) => {
     setSelected((s) => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
   };
 
+  const navigate = useNavigate();
   const openSchedule = () => {
     if (selected.length === 0) return alert("Select one or more requests to schedule");
-    setShowForm(true);
+    // navigate to scheduling page with selected IDs
+    const q = selected.join(",");
+    navigate(`/manager/schedule-requests?requestIds=${encodeURIComponent(q)}`);
   };
 
-  const submit = async () => {
-    try {
-      await ScheduleService.createFromRequests({ ...form, requestIds: selected });
-      alert("Scheduled successfully");
-      setShowForm(false);
-      setSelected([]);
-      load();
-    } catch (e: any) {
-      alert(e.message || "Failed to schedule");
-    }
-  };
+  // submit is handled on the schedule page
 
   const unscheduled = requests.filter(r => (r.status || 'Pending') === 'Pending');
   const scheduled = requests.filter(r => (r.status || 'Pending') === 'Scheduled');
@@ -50,90 +50,116 @@ export default function ManagerRequests() {
   return (
     <div className="bg-white shadow p-6 rounded-xl">
       <h3 className="text-xl font-semibold mb-4">Pickup Requests</h3>
+      {/* Top links to switch between views */}
+      <div className="flex space-x-4 mb-4">
+        <button
+          onClick={() => setView("unscheduled")}
+          className={`px-3 py-1 rounded ${view === "unscheduled" ? "bg-green-600 text-white" : "bg-gray-100"}`}
+        >
+          Unscheduled Requests
+        </button>
+        <button
+          onClick={() => setView("scheduled")}
+          className={`px-3 py-1 rounded ${view === "scheduled" ? "bg-green-600 text-white" : "bg-gray-100"}`}
+        >
+          Scheduled Requests
+        </button>
+      </div>
       {loading ? <p>Loading...</p> : (
         <>
-          <section className="mb-6">
-            <h4 className="font-medium mb-2">Unscheduled Requests</h4>
-            {unscheduled.length === 0 ? (
-              <p>No unscheduled requests.</p>
-            ) : (
-              <table className="w-full border-collapse mb-4">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-2 border">Select</th>
-                    <th className="p-2 border">Resident</th>
-                    <th className="p-2 border">Type</th>
-                    <th className="p-2 border">Weight</th>
-                    <th className="p-2 border">Requested On</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unscheduled.map((r) => (
-                    <tr key={r._id} className="text-center border-b">
-                      <td className="p-2 border">
-                        <input type="checkbox" checked={selected.includes(r._id)} onChange={() => toggle(r._id)} />
-                      </td>
-                      <td className="p-2 border">{r.residentName || r.residentId}</td>
-                      <td className="p-2 border">{r.wasteType}</td>
-                      <td className="p-2 border">{r.weight}</td>
-                      <td className="p-2 border">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <div className="flex items-center space-x-2">
-              <button onClick={openSchedule} className="bg-green-600 text-white px-4 py-2 rounded">Schedule</button>
-              <button onClick={load} className="bg-gray-200 px-4 py-2 rounded">Refresh</button>
-            </div>
-          </section>
-
-          <section>
-            <h4 className="font-medium mb-2">Scheduled Requests</h4>
-            {scheduled.length === 0 ? (
-              <p>No scheduled requests.</p>
-            ) : (
-              <table className="w-full border-collapse mb-4">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-2 border">Resident</th>
-                    <th className="p-2 border">Type</th>
-                    <th className="p-2 border">Weight</th>
-                    <th className="p-2 border">Status</th>
-                    <th className="p-2 border">Requested On</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {scheduled.map((r) => (
-                    <tr key={r._id} className="text-center border-b">
-                      <td className="p-2 border">{r.residentName || r.residentId}</td>
-                      <td className="p-2 border">{r.wasteType}</td>
-                      <td className="p-2 border">{r.weight}</td>
-                      <td className="p-2 border">{r.status}</td>
-                      <td className="p-2 border">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
-
-          {showForm && (
-            <div className="mt-6 p-4 border rounded">
-              <h4 className="font-medium mb-2">Schedule Selected Requests</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Schedule name" className="p-2 border" />
-                <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="p-2 border" />
-                <input type="time" value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))} className="p-2 border" />
-                <input value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="City" className="p-2 border" />
+          {view === "unscheduled" && (
+            <section className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium">Unscheduled Requests</h4>
+                <div className="flex items-center space-x-2">
+                  <button onClick={openSchedule} className="bg-green-600 text-white px-4 py-2 rounded">Schedule</button>
+                  <button onClick={load} className="bg-gray-200 px-4 py-2 rounded">Refresh</button>
+                </div>
               </div>
-              <div className="mt-4 space-x-2">
-                <button onClick={submit} className="bg-blue-600 text-white px-4 py-2 rounded">Confirm</button>
-                <button onClick={() => setShowForm(false)} className="bg-gray-200 px-4 py-2 rounded">Cancel</button>
-              </div>
-            </div>
+                {unscheduled.length === 0 ? (
+                  <p className="text-sm text-gray-600">No unscheduled requests.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-lg shadow-sm overflow-hidden">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Select</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested On</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {unscheduled.map((r, idx) => (
+                          <tr key={r._id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-green-50`}> 
+                            <td className="px-4 py-3">
+                              <input aria-label={`Select request ${r._id}`} type="checkbox" className="h-4 w-4 text-green-600 rounded border-gray-300" checked={selected.includes(r._id)} onChange={() => toggle(r._id)} />
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-800">{r.residentName || r.residentId}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{r.workStatus || 'Not complete'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{r.wasteType}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{r.address || '-'}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${r.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : r.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                                {r.status || 'Pending'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-500">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+            </section>
           )}
+
+          {view === "scheduled" && (
+            <section>
+              <h4 className="font-medium mb-2">Scheduled Requests</h4>
+              <div className="flex items-center justify-between mb-3">
+                <div />
+                <div className="flex items-center space-x-2">
+                  <button onClick={load} className="bg-gray-200 px-4 py-2 rounded">Refresh</button>
+                </div>
+              </div>
+              {scheduled.length === 0 ? (
+                <p className="text-sm text-gray-600">No scheduled requests.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white rounded-lg shadow-sm overflow-hidden">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested On</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scheduled.map((r, idx) => (
+                        <tr key={r._id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-green-50`}>
+                          <td className="px-4 py-3 text-sm text-gray-800">{r.residentName || r.residentId}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{r.workStatus || 'Pending'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{r.wasteType}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{r.address || '-'}</td>
+                          <td className="px-4 py-3 text-sm"><span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{r.status}</span></td>
+                          <td className="px-4 py-3 text-sm text-gray-500">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Scheduling now happens on separate page */}
         </>
       )}
     </div>

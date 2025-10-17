@@ -5,6 +5,8 @@ import ProtectedRoute from "./features/auth/ProtectedRoute";
 import Login from "./features/auth/Login";
 import Register from "./features/auth/Register";
 import ManagerDashboard from "./features/waste/ManagerDashboard";
+import ScheduleSelectedRequests from "./features/waste/components/ScheduleSelectedRequests";
+import { NavigationLayout } from "./components/navigation/NavigationLayout";
 import CollectorDashboard from "./features/waste/CollectionDashboard";
 import ResidentDashboard from "./features/waste/ResidentDashboard";
 
@@ -21,6 +23,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["manager"]}>
                 <ManagerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/schedule-requests"
+            element={
+              <ProtectedRoute allowedRoles={["manager"]}>
+                <NavigationLayout userRole="manager">
+                  <ScheduleSelectedRequests />
+                </NavigationLayout>
               </ProtectedRoute>
             }
           />

@@ -209,14 +209,23 @@ export class ScheduleService {
     // Create schedule from selected waste request IDs
     static async createFromRequests(payload: {
       requestIds: string[];
-      name: string;
+      // legacy name may be optional now
+      name?: string;
       date: string;
       time: string;
       city: string;
-      managerId?: string;
+      teamMemberId?: string; // frontend uses teamMemberId, map to managerId for backend
     }): Promise<any> {
       try {
-        const response = await axiosInstance.post<ApiResponse<any>>(`${this.BASE_URL}/from-requests`, payload);
+        const mapped = {
+          requestIds: payload.requestIds,
+          name: payload.name || "",
+          date: payload.date,
+          time: payload.time,
+          city: payload.city,
+          managerId: payload.teamMemberId
+        };
+        const response = await axiosInstance.post<ApiResponse<any>>(`${this.BASE_URL}/from-requests`, mapped);
         if (!response.data.success) {
           throw new Error(response.data.message || "Failed to create schedule from requests");
         }

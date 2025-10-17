@@ -18,4 +18,6 @@ export interface BreadcrumbProps extends NavigationProps {
   currentPath?: string;
   showIcons?: boolean;
   onToggleSidebar?: () => void;
+  // Indicates whether the sidebar is currently open (controls toggle icon state)
+  isOpen?: boolean;
 }

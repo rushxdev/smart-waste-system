@@ -285,6 +285,8 @@ export class ScheduleController {
         const reqDoc = await WasteRequest.findById(id);
         if (!reqDoc) continue;
         reqDoc.status = "Scheduled" as any;
+        // set work status to Pending when assigned to a schedule
+        (reqDoc as any).workStatus = "Pending";
         // Optionally store schedule id in notes or another field; use notes append
         reqDoc.notes = `${reqDoc.notes || ""} | scheduledId:${(schedule as any)._id}`;
         const saved = await reqDoc.save();
