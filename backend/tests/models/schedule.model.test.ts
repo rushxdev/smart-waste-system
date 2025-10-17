@@ -22,9 +22,10 @@ describe("Schedule Model", () => {
       const futureResult = validator.validator(futureDateString);
       expect(futureResult).toBe(true);
 
-      // Test with today's date
-      const today = new Date().toISOString().split('T')[0];
-      const todayResult = validator.validator(today);
+      // Test with today's date (use local date formatting to match validator)
+      const today = new Date();
+      const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayResult = validator.validator(todayString);
       expect(todayResult).toBe(true);
     });
   });
