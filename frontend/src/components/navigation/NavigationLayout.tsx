@@ -62,18 +62,17 @@ export const NavigationLayout: React.FC<NavigationLayoutProps> = ({
         />
       )}
 
-      {/* Navigation Sidebar - Full height */}
-      {isSidebarOpen && (
-        <div className="h-full transition-all duration-300 ease-in-out z-50">
-          <BreadcrumbNavigation
-            items={navigationItems}
-            onItemClick={handleItemClick}
-            currentPath={currentPath}
-            showIcons={true}
-            onToggleSidebar={toggleSidebar}
-          />
-        </div>
-      )}
+      {/* Navigation Sidebar - Full height (always rendered to allow smooth width transition) */}
+      <div className={`h-full transition-all duration-300 ease-in-out z-50 overflow-hidden ${isSidebarOpen ? 'w-64' : 'w-16'} bg-white`}>
+        <BreadcrumbNavigation
+          items={navigationItems}
+          onItemClick={handleItemClick}
+          currentPath={currentPath}
+          showIcons={true}
+          onToggleSidebar={toggleSidebar}
+          isOpen={isSidebarOpen}
+        />
+      </div>
 
       {/* Main Content Area - Adjusts based on sidebar state */}
       <div className="flex flex-col flex-1 transition-all duration-300 ease-in-out">
@@ -81,29 +80,7 @@ export const NavigationLayout: React.FC<NavigationLayoutProps> = ({
         <div className="bg-white shadow-sm border-b border-gray-200 p-4 z-20 relative">
           <div className="flex justify-between items-center px-6">
             <div className="flex items-center space-x-4">
-              {/* Toggle Button - Only show when sidebar is closed */}
-              {!isSidebarOpen && (
-                <button
-                  onClick={toggleSidebar}
-                  className="bg-[#3C4E1E] text-white p-2 rounded-lg shadow hover:bg-[#2A3616] transition-colors duration-200"
-                  aria-label="Open navigation sidebar"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              )}
+              {/* Toggle Button moved into the sidebar for a cohesive UX */}
               
               {/* Page Title */}
               <h1 className="text-xl font-semibold text-gray-800">

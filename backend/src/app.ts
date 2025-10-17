@@ -7,6 +7,7 @@ import wasteTrackingRoutes from "./routes/wasteTracking.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import authRoutes from "./routes/auth.routes.js"; 
 import scheduleRoutes from "./routes/schedule.routes";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
 app.use(cors());
@@ -25,5 +26,6 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/waste-tracking", wasteTrackingRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/schedules", scheduleRoutes);
+app.use("/api/users", userRoutes);
 
 export default app;

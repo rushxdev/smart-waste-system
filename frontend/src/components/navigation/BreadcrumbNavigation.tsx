@@ -10,7 +10,8 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbProps> = ({
   currentPath,
   showIcons = true,
   className = "",
-  onToggleSidebar
+  onToggleSidebar,
+  isOpen = true
 }) => {
   const [navigationManager] = useState(() => new NavigationStateManager(items));
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(items);
@@ -35,7 +36,7 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbProps> = ({
   };
 
   const baseClasses = `
-    bg-[#3C4E1E] h-screen w-64 shadow-lg flex flex-col
+    bg-[#3C4E1E] h-screen w-full shadow-lg flex flex-col
     ${className}
   `;
 
@@ -43,76 +44,77 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbProps> = ({
     <nav className={baseClasses} role="navigation" aria-label="Main navigation">
       {/* Navigation Header with Logo */}
       <div className="p-6 pb-4 flex-shrink-0">
-        {/* Close Button - Top Right */}
+        {/* Toggle Button - Top Right (moved here from header) */}
         {onToggleSidebar && (
           <div className="flex justify-end mb-4">
             <button
               onClick={onToggleSidebar}
               className="bg-[#3C4E1E] bg-opacity-20 text-white p-2 rounded-lg shadow hover:bg-opacity-30 transition-colors duration-200"
-              aria-label="Close navigation sidebar"
+              aria-label={"Toggle navigation sidebar"}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              {/* Show X when open, hamburger when closed */}
+              {isOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         )}
         
-        {/* Logo Section */}
-        <div className="flex items-center justify-center mb-4">
-          <div className="w-20 h-20 bg-white rounded-full p-2 shadow-lg">
-            <img 
-              src="/Sustainability-Focused CleanSphere Logo - Minimalist Design 3.png" 
-              alt="CleanSphere Logo" 
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-        
-        {/* Title Section */}
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-white mb-1">
-            CleanSphere
-          </h2>
-          <p className="text-green-200 text-sm mb-3">
-            Smart Waste System
-          </p>
-          <div className="h-1 bg-green-500 rounded-full w-16 mx-auto"></div>
-        </div>
+        {/* Logo and Title Section - show only when open */}
+        {isOpen && (
+          <>
+            <div className="flex items-center justify-center mb-4">
+              <div className={`w-20 h-20 bg-white rounded-full p-2 shadow-lg flex items-center justify-center`}>
+                <img 
+                  src="/Sustainability-Focused CleanSphere Logo - Minimalist Design 3.png" 
+                  alt="CleanSphere Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg font-bold text-white mb-1">
+                CleanSphere
+              </h2>
+              <p className="text-green-200 text-sm mb-3">
+                Smart Waste System
+              </p>
+              <div className="h-1 bg-green-500 rounded-full w-16 mx-auto"></div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 px-6 space-y-2 overflow-y-auto">
+      <div className={`${isOpen ? 'flex-1 px-6 space-y-2 overflow-y-auto' : 'flex flex-col items-center justify-start space-y-4 overflow-y-auto py-6'}`}>
         {navigationItems.map((item) => (
           <NavigationItemComponent
             key={item.id}
             item={item}
             onClick={handleItemClick}
             showIcon={showIcons}
+            isOpen={isOpen}
           />
         ))}
       </div>
 
-      {/* Navigation Footer */}
-      <div className="p-6 pt-4 flex-shrink-0 border-t border-green-700">
-        <div className="text-green-300 text-sm text-center">
-          <p className="mb-2">Need help?</p>
-          <button className="text-green-400 hover:text-white transition-colors text-sm font-medium">
-            Contact Support
-          </button>
+      {/* Navigation Footer - hide when collapsed */}
+      {isOpen && (
+        <div className="p-6 pt-4 flex-shrink-0 border-t border-green-700">
+          <div className="text-green-300 text-sm text-center">
+            <p className="mb-2">Need help?</p>
+            <button className="text-green-400 hover:text-white transition-colors text-sm font-medium">
+              Contact Support
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };

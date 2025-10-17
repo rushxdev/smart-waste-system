@@ -7,6 +7,7 @@ interface NavigationItemProps {
   onClick?: (item: NavigationItem) => void;
   showIcon?: boolean;
   className?: string;
+  isOpen?: boolean;
 }
 
 export const NavigationItemComponent: React.FC<NavigationItemProps> = ({
@@ -14,6 +15,7 @@ export const NavigationItemComponent: React.FC<NavigationItemProps> = ({
   onClick,
   showIcon = true,
   className = ""
+  , isOpen = true
 }) => {
   const handleClick = () => {
     if (onClick) {
@@ -21,13 +23,11 @@ export const NavigationItemComponent: React.FC<NavigationItemProps> = ({
     }
   };
 
-  const baseClasses = `
-    flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all duration-200
-    ${item.isActive 
-      ? "bg-[#34C759] text-white shadow-md" 
-      : "text-green-100 hover:bg-green-700 hover:text-white"
-    }
-  `;
+  const baseClasses = isOpen
+    ? `flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all duration-200
+        ${item.isActive ? "bg-[#34C759] text-white shadow-md" : "text-green-100 hover:bg-green-700 hover:text-white"}`
+    : `flex items-center justify-center p-2 rounded-lg cursor-pointer transition-all duration-200
+        ${item.isActive ? "bg-[#34C759] text-white" : "text-green-100 hover:bg-green-700 hover:text-white"}`;
 
   return (
     <div
@@ -46,8 +46,9 @@ export const NavigationItemComponent: React.FC<NavigationItemProps> = ({
           {item.icon}
         </span>
       )}
-      <span className="font-medium">{item.label}</span>
-      {item.isActive && (
+      {/* When collapsed, show only the icon */}
+      {isOpen && <span className="font-medium">{item.label}</span>}
+      {isOpen && item.isActive && (
         <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
       )}
     </div>

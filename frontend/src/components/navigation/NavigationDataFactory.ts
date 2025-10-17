@@ -24,13 +24,6 @@ export class NavigationDataFactory {
         icon: "📋",
         path: "/my-requests",
         isActive: false
-      },
-      {
-        id: "my-profile",
-        label: "Profile",
-        icon: "📋",
-        path: "/my-profile",
-        isActive: false
       }
     ];
   }
@@ -63,6 +56,13 @@ export class NavigationDataFactory {
         icon: "📈",
         path: "/manager/dashboard",
         isActive: true
+      },
+      {
+        id: "requests",
+        label: "Requests",
+        icon: "📥",
+        path: "/manager/requests",
+        isActive: false
       },
       {
         id: "team-overview",

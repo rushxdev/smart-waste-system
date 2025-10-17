@@ -7,6 +7,8 @@ const router = Router();
 
 // POST /api/schedules - Create a new schedule
 router.post("/", ScheduleController.create);
+// POST /api/schedules/from-requests - Create a schedule from selected waste requests
+router.post("/from-requests", ScheduleController.createFromRequests);
 
 // GET /api/schedules - Get all schedules with optional filters
 // Query parameters: managerId, status, city, startDate, endDate

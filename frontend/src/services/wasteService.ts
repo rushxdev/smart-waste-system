@@ -8,17 +8,29 @@ export interface WasteRequest {
   preferredDate: string;
   preferredTime: string;
   notes?: string;
-  status?: "Scheduled" | "Completed" | "Cancelled";
+  // include Pending and Collected to match front-end usage and back-end values
+  status?: "Pending" | "Scheduled" | "Collected" | "Completed" | "Cancelled";
+  residentName?: string;
+  weight?: number;
+  paymentStatus?: string;
   createdAt?: string;
 }
 
-export const createWasteRequest = async (data: Omit<WasteRequest, '_id' | 'status' | 'createdAt'>) => {
+export type CreateWasteRequest = Partial<Omit<WasteRequest, '_id' | 'status' | 'createdAt'>>;
+
+export const createWasteRequest = async (data: CreateWasteRequest) => {
   const res = await axiosInstance.post("/waste-requests", data);
   return res.data;
 };
 
 export const getResidentWasteRequests = async () => {
   const res = await axiosInstance.get("/waste-requests/my");
+  return res.data;
+};
+
+// Admin: get all waste requests
+export const getAllWasteRequests = async () => {
+  const res = await axiosInstance.get("/waste-requests");
   return res.data;
 };
 
